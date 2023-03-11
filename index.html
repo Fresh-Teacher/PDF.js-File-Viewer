@@ -16,7 +16,7 @@
         <div class="product-details">
           <h2>NURSERY PAST PAPERS</h2>
           <p> Past Papers</p>
-          <button onclick="viewPdf('https://raw.githubusercontent.com/Fresh-Teacher/secondary/main/05%20--%20S.6%20ENT%203%20REVISION%20QNS.pdf')">View</button>
+          <button onclick="viewPdf('https://raw.githubusercontent.com/Fresh-Teacher/secondary/main/05%20--%20S.6%20ENT%203%20REVISION%20QNS.pdf')">Preview</button>
         </div>
       </div>
       <!-- Single product - papers -->
@@ -24,7 +24,7 @@
         <div class="product-details">
           <h2>NURSERY PAST PAPERS</h2>
           <p> Past Papers</p>
-          <button onclick="viewPdf('https://raw.githubusercontent.com/Fresh-Teacher/secondary/main/02%20--%20S.2%20Mathematics%20Revision%20Work%20-and%20Upload.pdf')">View</button>
+          <button onclick="viewPdf('https://raw.githubusercontent.com/Fresh-Teacher/secondary/main/02%20--%20S.2%20Mathematics%20Revision%20Work%20-and%20Upload.pdf')">Preview</button>
         </div>
       </div>
       <!-- Single product - papers -->
@@ -32,12 +32,18 @@
         <div class="product-details">
           <h2>NURSERY PAST PAPERS</h2>
           <p> Past Papers</p>
-          <button onclick="viewPdf('https://raw.githubusercontent.com/Fresh-Teacher/secondary/main/-GENETICS%20AND%20EVOLUTION%20S4.pdf')">View</button>
+          <button onclick="viewPdf('https://raw.githubusercontent.com/Fresh-Teacher/secondary/main/-GENETICS%20AND%20EVOLUTION%20S4.pdf')">Preview</button>
         </div>
       </div>
       <br /><br /><br /><br /><br /><br /><br />
     </main>
     <style>
+      @media only screen and (max-width: 600px) {
+  canvas {
+    height: 80vh;
+  }
+}
+
       /* Style for PDF viewer container */
       #pdf-viewer-container {
   position: absolute;
@@ -103,13 +109,21 @@ button {
   navigationContainer.style.marginTop = '10px';
   canvasContainer.appendChild(navigationContainer);
 
+  const downloadButton = document.createElement('button');
+  downloadButton.innerText = 'Download';
+  downloadButton.style.marginLeft = '10px';
+  downloadButton.addEventListener('click', () => {
+    window.open(url, '_blank');
+  });
+  navigationContainer.appendChild(downloadButton);
+
   const prevButton = document.createElement('button');
-  prevButton.innerText = 'Previous Page';
+  prevButton.innerText = 'Previous';
   prevButton.disabled = true;
   navigationContainer.appendChild(prevButton);
 
   const nextButton = document.createElement('button');
-  nextButton.innerText = 'Next Page';
+  nextButton.innerText = 'Next';
   nextButton.disabled = true;
   navigationContainer.appendChild(nextButton);
 
@@ -118,17 +132,9 @@ button {
   pageNumberSpan.style.marginTop = '10px';
   canvasContainer.appendChild(pageNumberSpan);
 
-  const scrollButton = document.createElement('button');
-  scrollButton.innerText = 'Scroll to Top';
-  scrollButton.style.marginLeft = '10px';
-  scrollButton.addEventListener('click', () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-  navigationContainer.appendChild(scrollButton);
-
 
   const closeButton = document.createElement('button');
-  closeButton.innerText = 'Exit';
+  closeButton.innerText = 'Close';
   closeButton.style.marginLeft = '10px';
   closeButton.addEventListener('click', () => {
     document.body.removeChild(canvasContainer);
@@ -197,8 +203,9 @@ button {
 
   // Event listener for navigation buttons
   prevButton.addEventListener('click', () => {
-    if
-    (pageNum <= 1) {
+    if (pageNum <= 1) {
+     // Disable previous button when on the first page
+prevButton.disabled = true;
 return;
 }
 pageNum--;
@@ -207,6 +214,8 @@ renderPage(pageNum);
 
 nextButton.addEventListener('click', () => {
 if (pageNum >= pdfDoc.numPages) {
+// Disable next button when on the last page
+nextButton.disabled = true;
 return;
 }
 pageNum++;
