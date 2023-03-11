@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>PDF Viewer</title>
+    <script src="https://mozilla.github.io/pdf.js/build/pdf.js"></script>
+  </head>
+  <body>
+    <!-- ======= Header ======= -->
+
+    <main>
+      <!-- Single product - papers -->
+      <div class="store-product papers">
+        <div class="product-details">
+          <h2>NURSERY PAST PAPERS</h2>
+          <p> Past Papers</p>
+          <button onclick="viewPdf('https://raw.githubusercontent.com/Fresh-Teacher/secondary/main/05%20--%20S.6%20ENT%203%20REVISION%20QNS.pdf')">View</button>
+        </div>
+      </div>
+      <!-- Single product - papers -->
+      <div class="store-product papers">
+        <div class="product-details">
+          <h2>NURSERY PAST PAPERS</h2>
+          <p> Past Papers</p>
+          <button onclick="viewPdf('https://raw.githubusercontent.com/Fresh-Teacher/secondary/main/02%20--%20S.2%20Mathematics%20Revision%20Work%20-and%20Upload.pdf')">View</button>
+        </div>
+      </div>
+      <!-- Single product - papers -->
+      <div class="store-product papers">
+        <div class="product-details">
+          <h2>NURSERY PAST PAPERS</h2>
+          <p> Past Papers</p>
+          <button onclick="viewPdf('https://raw.githubusercontent.com/Fresh-Teacher/secondary/main/-GENETICS%20AND%20EVOLUTION%20S4.pdf')">View</button>
+        </div>
+      </div>
+      <br /><br /><br /><br /><br /><br /><br />
+    </main>
+    <style>
+      /* Style for PDF viewer container */
+      #pdf-viewer-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  overflow: hidden;
+}
+
+button {
+  display: inline-block;
+}
+
+      body {
+    overflow-x: hidden;
+  }
+
+      /* Style for close button */
+      #pdf-viewer-container button {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+      }
+
+      /* Style for PDF viewer canvas */
+      #pdf-viewer-container canvas {
+        border: 1px solid #333333;
+        
+      }
+
+      /* Style for PDF viewer navigation buttons */
+      #pdf-viewer-container button:nth-child(2),
+      #pdf-viewer-container button:nth-child(3) {
+        margin: 10px;
+      }
+    </style>
+    <script>
+ function viewPdf(url) {
+  const canvasContainer = document.createElement('div');
+  canvasContainer.style.display = 'flex';
+  canvasContainer.style.flexDirection = 'column';
+  canvasContainer.style.alignItems = 'center';
+  canvasContainer.style.marginTop = '-500px'; // negative value
+
+  document.body.appendChild(canvasContainer);
+
+  const canvas = document.createElement('canvas');
+  canvas.style.border = '1px solid #333333';
+  canvas.style.width = '100%';
+  canvas.style.height = '100%';
+  canvasContainer.appendChild(canvas);
+
+  const navigationContainer = document.createElement('div');
+  navigationContainer.style.display = 'flex';
+  navigationContainer.style.width = '100%';
+  navigationContainer.style.justifyContent = 'space-between';
+  navigationContainer.style.marginTop = '10px';
+  canvasContainer.appendChild(navigationContainer);
+
+  const prevButton = document.createElement('button');
+  prevButton.innerText = 'Previous Page';
+  prevButton.disabled = true;
+  navigationContainer.appendChild(prevButton);
+
+  const nextButton = document.createElement('button');
+  nextButton.innerText = 'Next Page';
+  nextButton.disabled = true;
+  navigationContainer.appendChild(nextButton);
+
+  
+  const pageNumberSpan = document.createElement('span');
+  pageNumberSpan.style.marginTop = '10px';
+  canvasContainer.appendChild(pageNumberSpan);
+
+  const scrollButton = document.createElement('button');
+  scrollButton.innerText = 'Scroll to Top';
+  scrollButton.style.marginLeft = '10px';
+  scrollButton.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+  navigationContainer.appendChild(scrollButton);
+
+
+  const closeButton = document.createElement('button');
+  closeButton.innerText = 'Exit';
+  closeButton.style.marginLeft = '10px';
+  closeButton.addEventListener('click', () => {
+    document.body.removeChild(canvasContainer);
+  });
+  navigationContainer.appendChild(closeButton);
+
+  document.body.appendChild(canvasContainer);
+
+  let pdfDoc = null;
+  let pageNum = 1;
+  let pageRendering = false;
+  let pageNumPending = null;
+  const scale = 1;
+  const canvasContext = canvas.getContext('2d');
+
+  function renderPage(num) {
+    pageRendering = true;
+
+    // Using promise to fetch the page
+    pdfDoc.getPage(num).then(function(page) {
+      // Set dimensions of the canvas equal to the dimensions of the viewport
+      const viewport = page.getViewport({ scale: 1 });
+
+      canvas.height = viewport.height;
+      canvas.width = viewport.width;
+
+      const renderContext = {
+        canvasContext,
+        viewport,
+      };
+      const renderTask = page.render(renderContext);
+
+      // Wait for rendering to finish
+      renderTask.promise.then(function() {
+        pageRendering = false;
+        if (pageNumPending !== null) {
+          // New page rendering is pending
+          renderPage(pageNumPending);
+          pageNumPending = null;
+        }
+      });
+
+      // Update page number
+      pageNumberSpan.textContent = `Page ${pageNum} of ${pdfDoc.numPages}`;
+    });
+
+    // Update navigation buttons
+    if (pageNum === 1) {
+      prevButton.disabled = true;
+    } else {
+      prevButton.disabled = false;
+    }
+    if (pageNum === pdfDoc.numPages) {
+      nextButton.disabled = true;
+    } else {
+      nextButton.disabled = false;
+    }
+  }
+
+  // Get PDF document
+  pdfjsLib.getDocument(url).promise.then(function(pdfDoc_) {
+    pdfDoc = pdfDoc_;
+    renderPage(pageNum);
+    nextButton.disabled = false;
+  });
+
+  // Event listener for navigation buttons
+  prevButton.addEventListener('click', () => {
+    if
+    (pageNum <= 1) {
+return;
+}
+pageNum--;
+renderPage(pageNum);
+});
+
+nextButton.addEventListener('click', () => {
+if (pageNum >= pdfDoc.numPages) {
+return;
+}
+pageNum++;
+renderPage(pageNum);
+});
+}
+</script>
+</body>
+</html>
